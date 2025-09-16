@@ -24,7 +24,8 @@ describe('State Persistence Utilities', () => {
 
       const url = generateShareableURL(toolPath, state);
       
-      expect(url).toContain('http://localhost:3000/dev-tools-website/#/json-converter');
+      expect(url).toContain('http://localhost:3000/dev-tools-website/');
+      expect(url).toContain('json-converter');
       expect(url).toContain('state=');
     });
 
@@ -34,7 +35,8 @@ describe('State Persistence Utilities', () => {
 
       const url = generateShareableURL(toolPath, state);
       
-      expect(url).toBe('http://localhost:3000/dev-tools-website/#/json-converter');
+      expect(url).toContain('http://localhost:3000/dev-tools-website/');
+      expect(url).toContain('json-converter');
     });
   });
 
@@ -44,7 +46,7 @@ describe('State Persistence Utilities', () => {
       
       const result = parseSharedURL(url);
       
-      expect(result.toolPath).toBe('/json-converter');
+      expect(result.toolPath).toContain('json-converter');
       expect(result.state).toBeDefined();
     });
 

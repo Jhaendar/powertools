@@ -41,6 +41,31 @@ export default defineConfig(async () => {
       globals: true,
       environment: 'jsdom',
       setupFiles: './src/setupTests.ts',
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+        exclude: [
+          'node_modules/',
+          'src/setupTests.ts',
+          '**/*.d.ts',
+          '**/*.test.{ts,tsx}',
+          '**/__tests__/**',
+          'src/reportWebVitals.ts',
+          'src/react-app-env.d.ts',
+          'build/',
+          'public/',
+          'scripts/',
+          'docs/'
+        ],
+        thresholds: {
+          global: {
+            branches: 70,
+            functions: 70,
+            lines: 70,
+            statements: 70
+          }
+        }
+      }
     },
     resolve: {
       alias: {

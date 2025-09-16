@@ -28,27 +28,27 @@ const Home = () => {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Dev Tools Website</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">Dev Tools Website</h1>
+        <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
           A collection of useful developer tools built with React, Vite, and shadcn/ui. 
           Choose a tool from the sidebar or explore the available options below.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {tools.map((tool) => (
           <Card key={tool.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-lg bg-primary/10">
                 {getToolIcon(tool.id)}
               </div>
-              <CardTitle>{tool.name}</CardTitle>
-              <CardDescription>{tool.description}</CardDescription>
+              <CardTitle className="text-lg sm:text-xl">{tool.name}</CardTitle>
+              <CardDescription className="text-sm">{tool.description}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <a
                 href={`#${tool.path}`}
-                className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors touch-manipulation min-h-[44px]"
               >
                 Open Tool
               </a>

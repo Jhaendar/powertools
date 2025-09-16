@@ -10,9 +10,10 @@ import { cn } from '../../lib/utils';
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+  onClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
   const location = useLocation();
   const toolRegistry = useToolRegistry();
   const toolsByCategory = toolRegistry.getToolsByCategory();
@@ -54,9 +55,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   }) => (
     <Link
       to={to}
-      onClick={onClick}
+      onClick={() => {
+        onClick?.();
+        // Close sidebar on mobile when navigating
+        if (window.innerWidth < 1024) {
+          onClose?.();
+        }
+      }}
       className={cn(
-        "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+        "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors touch-manipulation min-h-[44px]", // Better touch targets
         isActive(to)
           ? "bg-accent text-accent-foreground"
           : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
@@ -159,6 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
     <>
       {/* Desktop Sidebar */}
       <aside
+        data-sidebar
         className={cn(
           "fixed left-0 top-0 z-40 h-screen w-64 bg-background border-r transition-transform duration-300 ease-in-out lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
@@ -171,7 +179,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
       {isOpen && (
         <div
           className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
-          onClick={onToggle}
+          onClick={onClose || onToggle}
         />
       )}
     </>

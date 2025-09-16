@@ -1,10 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, renderHook, act } from '@/utils/test-utils';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { ToolErrorBoundary } from '../ToolErrorBoundary';
 import { ErrorDisplay } from '../ErrorDisplay';
 import { useErrorHandler } from '../useErrorHandler';
-import { renderHook, act } from '@testing-library/react';
 import { vi } from 'vitest';
 
 // Mock component that throws an error

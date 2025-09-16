@@ -414,12 +414,12 @@ const JSONVisualizerCore: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col">
-      <div className="flex-1 flex overflow-hidden" ref={containerRef}>
+    <div className="min-h-screen flex flex-col lg:h-screen">
+      <div className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden" ref={containerRef}>
         {/* Input Section */}
         <div 
-          className={`flex flex-col border-r border-gray-200 dark:border-gray-700 ${!isResizing ? 'transition-all duration-75' : ''}`}
-          style={{ width: `${leftWidth}%` }}
+          className={`flex flex-col lg:border-r border-gray-200 dark:border-gray-700 ${!isResizing ? 'lg:transition-all duration-75' : ''} mb-4 lg:mb-0`}
+          style={{ width: window.innerWidth >= 1024 ? `${leftWidth}%` : '100%' }}
         >
           <Card className="flex-1 flex flex-col border-0 rounded-none shadow-none">
             <CardHeader className="flex-shrink-0">
@@ -453,12 +453,12 @@ const JSONVisualizerCore: React.FC = () => {
                 Paste your JSON data to visualize it as an interactive tree structure
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col space-y-4 overflow-hidden">
+            <CardContent className="flex-1 flex flex-col space-y-4 lg:overflow-hidden">
               <Textarea
                 placeholder="Paste your JSON data here..."
                 value={input}
                 onChange={(e) => handleInputChange(e.target.value)}
-                className="flex-1 font-mono text-sm resize-none"
+                className="flex-1 font-mono text-sm resize-none min-h-[200px] lg:min-h-0"
                 style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
                 disabled={isProcessing}
               />
@@ -495,9 +495,9 @@ const JSONVisualizerCore: React.FC = () => {
           </Card>
         </div>
 
-        {/* Resize Handle */}
+        {/* Resize Handle - Hidden on mobile */}
         <div 
-          className={`w-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-col-resize flex items-center justify-center group transition-colors select-none ${isResizing ? 'bg-gray-300 dark:bg-gray-600' : ''}`}
+          className={`hidden lg:flex w-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-col-resize items-center justify-center group transition-colors select-none ${isResizing ? 'bg-gray-300 dark:bg-gray-600' : ''}`}
           onMouseDown={handleMouseDown}
           style={{ userSelect: 'none' }}
         >
@@ -506,8 +506,8 @@ const JSONVisualizerCore: React.FC = () => {
 
         {/* Visualizer Section */}
         <div 
-          className={`flex flex-col ${!isResizing ? 'transition-all duration-75' : ''}`}
-          style={{ width: `${100 - leftWidth}%` }}
+          className={`flex flex-col ${!isResizing ? 'lg:transition-all duration-75' : ''}`}
+          style={{ width: window.innerWidth >= 1024 ? `${100 - leftWidth}%` : '100%' }}
         >
           <Card className="flex-1 flex flex-col border-0 rounded-none shadow-none">
             <CardHeader className="flex-shrink-0">
@@ -556,16 +556,16 @@ const JSONVisualizerCore: React.FC = () => {
                 </div>
               )}
             </CardHeader>
-            <CardContent className="flex-1 overflow-hidden">
+            <CardContent className="flex-1 lg:overflow-hidden">
               {!parsedData ? (
-                <div className="h-full flex items-center justify-center text-center text-gray-500 dark:text-gray-400">
+                <div className="min-h-[200px] lg:h-full flex items-center justify-center text-center text-gray-500 dark:text-gray-400">
                   <div>
                     <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Enter valid JSON data to see the tree visualization</p>
                   </div>
                 </div>
               ) : (
-                <div className="h-full overflow-y-auto border rounded-lg p-4 bg-gray-50 dark:bg-gray-900 font-mono" style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
+                <div className="min-h-[300px] lg:h-full overflow-y-auto border rounded-lg p-4 bg-gray-50 dark:bg-gray-900 font-mono" style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
                   {filteredTreeData && filteredTreeData.length > 0 ? (
                     filteredTreeData.map(node => renderTreeNode(node))
                   ) : (

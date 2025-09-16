@@ -168,7 +168,7 @@ Example:
           <CardTitle>Configuration</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Format:</span>
               <Toggle
@@ -176,6 +176,7 @@ Example:
                 onPressedChange={handleFormatToggle}
                 aria-label="Toggle formatted output"
                 variant="outline"
+                className="touch-manipulation min-h-[44px]"
               >
                 {isFormatted ? 'Pretty' : 'Minified'}
               </Toggle>
@@ -187,6 +188,7 @@ Example:
                 onPressedChange={handleOuterDelimiterToggle}
                 aria-label="Toggle outer delimiter"
                 variant="outline"
+                className="touch-manipulation min-h-[44px]"
               >
                 {outerDelimiter === '"' ? 'Double "' : "Single '"}
               </Toggle>
@@ -201,25 +203,27 @@ Example:
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>JSON Input</CardTitle>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleShare}
                   disabled={!input}
                   title="Copy shareable URL"
+                  className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  <ShareIcon />
-                  Share
+                  <ShareIcon className="h-4 w-4" />
+                  <span className="ml-2">Share</span>
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleClearInput}
                   disabled={!input}
+                  className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  <TrashIcon />
-                  Clear
+                  <TrashIcon className="h-4 w-4" />
+                  <span className="ml-2">Clear</span>
                 </Button>
               </div>
             </div>
@@ -237,7 +241,7 @@ Example:
               value={input}
               onChange={handleInputChange}
               placeholder={placeholderText}
-              className="min-h-[300px] font-mono text-sm"
+              className="min-h-[200px] sm:min-h-[300px] font-mono text-sm touch-manipulation"
               aria-label="JSON input"
             />
           </CardContent>
@@ -248,24 +252,26 @@ Example:
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>String Output</CardTitle>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleCopy}
                   disabled={!output}
+                  className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  {isCopied ? <CheckIcon /> : <CopyIcon />}
-                  {isCopied ? 'Copied!' : 'Copy'}
+                  {isCopied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
+                  <span className="ml-2">{isCopied ? 'Copied!' : 'Copy'}</span>
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleClearOutput}
                   disabled={!output}
+                  className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  <TrashIcon />
-                  Clear
+                  <TrashIcon className="h-4 w-4" />
+                  <span className="ml-2">Clear</span>
                 </Button>
               </div>
             </div>
@@ -275,7 +281,7 @@ Example:
               value={output}
               readOnly
               placeholder="Converted JSON will appear here..."
-              className="min-h-[300px] font-mono text-sm bg-muted/50"
+              className="min-h-[200px] sm:min-h-[300px] font-mono text-sm bg-muted/50 touch-manipulation"
               aria-label="JSON string output"
             />
           </CardContent>

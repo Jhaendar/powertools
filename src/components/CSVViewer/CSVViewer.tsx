@@ -292,7 +292,7 @@ const CSVViewerCore: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* File Upload and Controls */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="csv-file">Upload CSV File</Label>
               <Input
@@ -301,13 +301,14 @@ const CSVViewerCore: React.FC = () => {
                 accept=".csv"
                 ref={fileInputRef}
                 onChange={handleFileUpload}
+                className="touch-manipulation min-h-[44px]"
               />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="row-limit">Rows per page</Label>
               <Select value={rowLimit.toString()} onValueChange={handleRowLimitChange}>
-                <SelectTrigger>
+                <SelectTrigger className="touch-manipulation min-h-[44px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -320,13 +321,13 @@ const CSVViewerCore: React.FC = () => {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2 lg:col-span-1">
               <Label htmlFor="header-detection">Header Detection</Label>
               <Select 
                 value={hasHeaders === null ? 'auto' : hasHeaders.toString()} 
                 onValueChange={handleHeaderToggle}
               >
-                <SelectTrigger>
+                <SelectTrigger className="touch-manipulation min-h-[44px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -339,15 +340,27 @@ const CSVViewerCore: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={handlePaste} variant="outline">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+            <Button 
+              onClick={handlePaste} 
+              variant="outline"
+              className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
+            >
               Paste from Clipboard
             </Button>
-            <Button onClick={handleClear} variant="outline">
+            <Button 
+              onClick={handleClear} 
+              variant="outline"
+              className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
+            >
               Clear
             </Button>
             {csvData.totalRows > 0 && (
-              <Button onClick={copyTableData} variant="outline">
+              <Button 
+                onClick={copyTableData} 
+                variant="outline"
+                className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
+              >
                 Copy Visible Data
               </Button>
             )}
@@ -358,7 +371,7 @@ const CSVViewerCore: React.FC = () => {
             <Label htmlFor="csv-input">Or paste CSV data directly:</Label>
             <textarea
               id="csv-input"
-              className="w-full h-32 p-3 border rounded-md resize-vertical font-mono text-sm"
+              className="w-full h-32 p-3 border rounded-md resize-vertical font-mono text-sm touch-manipulation"
               placeholder="Paste your CSV data here..."
               value={rawInput}
               onChange={handleTextareaChange}
@@ -420,43 +433,46 @@ const CSVViewerCore: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {csvData.headers.map((header, index) => (
-                      <TableHead key={index} className="whitespace-nowrap">
-                        {header}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {visibleRows.map((row, rowIndex) => (
-                    <TableRow key={startIndex + rowIndex}>
-                      {row.map((cell, cellIndex) => (
-                        <TableCell key={cellIndex} className="whitespace-nowrap">
-                          {cell}
-                        </TableCell>
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="min-w-full px-4 sm:px-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {csvData.headers.map((header, index) => (
+                        <TableHead key={index} className="whitespace-nowrap min-w-[120px] text-xs sm:text-sm">
+                          {header}
+                        </TableHead>
                       ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {visibleRows.map((row, rowIndex) => (
+                      <TableRow key={startIndex + rowIndex}>
+                        {row.map((cell, cellIndex) => (
+                          <TableCell key={cellIndex} className="whitespace-nowrap min-w-[120px] text-xs sm:text-sm">
+                            {cell}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-between items-center mt-4">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-2">
+                <div className="text-sm text-muted-foreground order-2 sm:order-1">
                   Page {currentPage} of {totalPages}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 order-1 sm:order-2">
                   <Button
                     onClick={handlePreviousPage}
                     disabled={currentPage === 1}
                     variant="outline"
                     size="sm"
+                    className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                   >
                     Previous
                   </Button>
@@ -465,6 +481,7 @@ const CSVViewerCore: React.FC = () => {
                     disabled={currentPage === totalPages}
                     variant="outline"
                     size="sm"
+                    className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                   >
                     Next
                   </Button>
