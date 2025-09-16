@@ -34,8 +34,11 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest",
+    "test:ci": "vitest --run",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "deploy:test": "npm run build && npm run preview",
+    "verify:deployment": "node scripts/verify-deployment.js"
   },
   "browserslist": {
     "production": [
