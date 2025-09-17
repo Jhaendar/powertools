@@ -5,7 +5,7 @@ This document provides instructions for deploying the Dev Tools Website to GitHu
 ## Prerequisites
 
 1. GitHub repository with GitHub Pages enabled
-2. Node.js 18+ installed locally
+2. Node.js 20+ installed locally
 3. npm or yarn package manager
 
 ## Automated Deployment (Recommended)
