@@ -50,9 +50,9 @@ describe('Tool Integration Tests', () => {
     
     // Wait for processing
     await waitFor(() => {
-      expect(output.value).toBeTruthy();
-      expect(output.value).toContain('name');
-      expect(output.value).toContain('test');
+      expect((output as HTMLTextAreaElement).value).toBeTruthy();
+      expect((output as HTMLTextAreaElement).value).toContain('name');
+      expect((output as HTMLTextAreaElement).value).toContain('test');
     });
     
     // Test copy functionality

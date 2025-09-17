@@ -94,10 +94,10 @@ describe('JSONConverter', () => {
     
     // Wait for processing and get the actual output value
     await waitFor(() => {
-      expect(output.value).toBeTruthy();
+      expect((output as HTMLTextAreaElement).value).toBeTruthy();
     });
     
-    const actualOutput = output.value;
+    const actualOutput = (output as HTMLTextAreaElement).value;
     
     // Click copy
     fireEvent.click(copyButton);
@@ -157,11 +157,11 @@ describe('JSONConverter', () => {
     fireEvent.change(input, { target: { value: '[1, 2, 3]' } });
     
     await waitFor(() => {
-      expect(output.value).toBeTruthy();
+      expect((output as HTMLTextAreaElement).value).toBeTruthy();
       // Should contain the array elements regardless of formatting
-      expect(output.value).toContain('1');
-      expect(output.value).toContain('2');
-      expect(output.value).toContain('3');
+      expect((output as HTMLTextAreaElement).value).toContain('1');
+      expect((output as HTMLTextAreaElement).value).toContain('2');
+      expect((output as HTMLTextAreaElement).value).toContain('3');
     });
     
     // Test string
@@ -205,19 +205,19 @@ describe('JSONConverter', () => {
     
     // Wait for initial processing
     await waitFor(() => {
-      expect(output.value).toBeTruthy();
-      expect(output.value).toContain('name');
-      expect(output.value).toContain('John');
+      expect((output as HTMLTextAreaElement).value).toBeTruthy();
+      expect((output as HTMLTextAreaElement).value).toContain('name');
+      expect((output as HTMLTextAreaElement).value).toContain('John');
     });
     
-    const initialOutput = output.value;
+    const initialOutput = (output as HTMLTextAreaElement).value;
     
     // Toggle to single quotes
     fireEvent.click(delimiterToggle);
     
     await waitFor(() => {
-      expect(output.value).not.toBe(initialOutput);
-      expect(output.value).toMatch(/^'/); // Should start with single quote
+      expect((output as HTMLTextAreaElement).value).not.toBe(initialOutput);
+      expect((output as HTMLTextAreaElement).value).toMatch(/^'/); // Should start with single quote
       expect(screen.getByText("Single '")).toBeInTheDocument();
     });
     
@@ -225,8 +225,8 @@ describe('JSONConverter', () => {
     fireEvent.click(delimiterToggle);
     
     await waitFor(() => {
-      expect(output.value).toBe(initialOutput);
-      expect(output.value).toMatch(/^"/); // Should start with double quote
+      expect((output as HTMLTextAreaElement).value).toBe(initialOutput);
+      expect((output as HTMLTextAreaElement).value).toMatch(/^"/); // Should start with double quote
       expect(screen.getByText('Double "')).toBeInTheDocument();
     });
   });
