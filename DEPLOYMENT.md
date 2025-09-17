@@ -17,7 +17,7 @@ The project is configured with GitHub Actions for automatic deployment:
 1. **Enable GitHub Pages in your repository:**
    - Go to Settings > Pages
    - Select "GitHub Actions" as the source
-   - The workflow will automatically deploy on pushes to the `main` branch
+   - The workflow will automatically deploy on pushes to the `release` branch
 
 2. **Update the base URL in `vite.config.ts`:**
    ```typescript
@@ -31,11 +31,47 @@ The project is configured with GitHub Actions for automatic deployment:
 
 ### Workflow Features
 
-- ✅ Automatic deployment on push to main branch
+- ✅ Automatic deployment on push to release branch
 - ✅ Runs tests before deployment
 - ✅ Optimized build process
 - ✅ Proper permissions for GitHub Pages
 - ✅ Concurrent deployment protection
+
+### Release Process
+
+The project uses a two-branch deployment strategy:
+
+- **`main` branch**: Development branch for ongoing work
+- **`release` branch**: Production branch that triggers deployments
+
+**To deploy your changes:**
+
+1. **Develop on main branch:**
+   ```bash
+   git checkout main
+   # Make your changes
+   git add .
+   git commit -m "Your changes"
+   git push origin main
+   ```
+
+2. **Deploy to production:**
+   ```bash
+   # Merge main into release to trigger deployment
+   git checkout release
+   git merge main
+   git push origin release
+   ```
+
+3. **Alternative: Direct push to release:**
+   ```bash
+   # If you want to deploy specific changes directly
+   git checkout release
+   # Make your changes or cherry-pick commits
+   git push origin release
+   ```
+
+The GitHub Actions workflow will automatically build and deploy when changes are pushed to the `release` branch.
 
 ## Manual Deployment
 

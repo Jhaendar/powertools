@@ -7,7 +7,7 @@ export default defineConfig(async () => {
   const tailwindcss = (await import('@tailwindcss/vite')).default
   return {
     plugins: [react(), tailwindcss()],
-    base: '/dev-tools-website/',
+    base: '/powertools/',
     build: {
       outDir: 'build',
       assetsDir: 'static',

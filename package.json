@@ -2,7 +2,7 @@
   "name": "dev-tools-website",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://username.github.io/dev-tools-website",
+  "homepage": "https://jhaendar.github.io/powertools",
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
