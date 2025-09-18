@@ -21,6 +21,7 @@
     "@types/react-dom": "^19.1.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "diff": "^8.0.2",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -57,6 +58,7 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.8.0",
+    "@types/diff": "^7.0.2",
     "@types/node": "^24.5.0",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.0.2",

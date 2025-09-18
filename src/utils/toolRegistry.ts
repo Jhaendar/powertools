@@ -6,6 +6,10 @@ const JSONConverter = React.lazy(() => import('../components/JSONConverter/JSONC
 const JSONVisualizer = React.lazy(() => import('../components/JSONVisualizer/JSONVisualizer'));
 const CSVViewer = React.lazy(() => import('../components/CSVViewer/CSVViewer'));
 
+// New developer tools
+const JSONTypeGenerator = React.lazy(() => import('../components/JSONTypeGenerator/JSONTypeGenerator'));
+const DiffChecker = React.lazy(() => import('../components/DiffChecker/DiffChecker'));
+
 class ToolRegistryImpl implements ToolRegistry {
   private _tools: Tool[] = [];
 
@@ -36,6 +40,27 @@ class ToolRegistryImpl implements ToolRegistry {
       component: CSVViewer,
       description: 'View CSV data in a table format',
       category: 'Data Processing'
+    });
+
+    // New developer tools
+    this.registerTool({
+      id: 'json-type-generator',
+      name: 'JSON Type Generator',
+      path: '/json-type-generator',
+      component: JSONTypeGenerator,
+      description: 'Generate type definitions from JSON data',
+      icon: 'Code2',
+      category: 'Code Generation'
+    });
+
+    this.registerTool({
+      id: 'diff-checker',
+      name: 'Diff Checker',
+      path: '/diff-checker',
+      component: DiffChecker,
+      description: 'Compare text differences with GitHub-style output',
+      icon: 'GitCompare',
+      category: 'Text Processing'
     });
 
     // Future tools - placeholder for demonstration
