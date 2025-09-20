@@ -22,7 +22,7 @@ export default defineConfig(async () => {
                  '@radix-ui/react-navigation-menu', '@radix-ui/react-select', '@radix-ui/react-separator',
                  '@radix-ui/react-slot', '@radix-ui/react-toggle', 'lucide-react'],
             // Utility libraries chunk
-            utils: ['clsx', 'class-variance-authority', 'tailwind-merge']
+            utils: ['clsx', 'class-variance-authority', 'tailwind-merge', 'diff']
           }
         }
       },
@@ -74,7 +74,7 @@ export default defineConfig(async () => {
     },
     // Performance optimizations
     optimizeDeps: {
-      include: ['react', 'react-dom', 'react-router-dom', 'lucide-react']
+      include: ['react', 'react-dom', 'react-router-dom', 'lucide-react', 'diff']
     }
   }
 })

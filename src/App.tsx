@@ -4,7 +4,7 @@ import { ToolRegistryProvider, useToolRegistry } from './contexts/ToolRegistryCo
 import { Layout } from './components/Layout/Layout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card';
-import { Code2, FileText, Table } from 'lucide-react';
+import { Code2, FileText, Table, GitCompare } from 'lucide-react';
 import './App.css';
 
 // Enhanced home component with tool overview
@@ -12,7 +12,13 @@ const Home = () => {
   const toolRegistry = useToolRegistry();
   const tools = toolRegistry.getAllTools();
 
-  const getToolIcon = (toolId: string) => {
+  const getToolIcon = (toolId: string, iconName?: string) => {
+    // Use the icon from the tool definition if available
+    if (iconName === 'GitCompare') {
+      return <GitCompare className="h-8 w-8" />;
+    }
+    
+    // Fallback to tool-specific icons
     switch (toolId) {
       case 'json-converter':
         return <Code2 className="h-8 w-8" />;
@@ -20,6 +26,10 @@ const Home = () => {
         return <FileText className="h-8 w-8" />;
       case 'csv-viewer':
         return <Table className="h-8 w-8" />;
+      case 'json-type-generator':
+        return <Code2 className="h-8 w-8" />;
+      case 'diff-checker':
+        return <GitCompare className="h-8 w-8" />;
       default:
         return <Code2 className="h-8 w-8" />;
     }
@@ -40,7 +50,7 @@ const Home = () => {
           <Card key={tool.id} className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader className="text-center pb-4">
               <div className="mx-auto mb-4 flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-lg bg-primary/10">
-                {getToolIcon(tool.id)}
+                {getToolIcon(tool.id, tool.icon)}
               </div>
               <CardTitle className="text-lg sm:text-xl">{tool.name}</CardTitle>
               <CardDescription className="text-sm">{tool.description}</CardDescription>

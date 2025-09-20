@@ -76,3 +76,20 @@ class ClipboardHelperImpl implements ClipboardHelper {
 
 // Export singleton instance
 export const clipboardHelper = new ClipboardHelperImpl();
+
+/**
+ * Simple copy to clipboard function
+ * @param text - Text to copy to clipboard
+ * @returns Promise<boolean> - Success status
+ */
+export async function copyToClipboard(text: string): Promise<boolean> {
+  return clipboardHelper.copy(text);
+}
+
+/**
+ * Check if clipboard functionality is available
+ * @returns boolean - Whether clipboard is supported
+ */
+export function isClipboardSupported(): boolean {
+  return clipboardHelper.isSupported();
+}
