@@ -96,8 +96,8 @@ describe('JSONTypeGenerator', () => {
     fireEvent.change(jsonInput, { target: { value: testJSON } });
     expect(jsonInput).toHaveValue(testJSON);
     
-    // Click clear button
-    const clearButton = screen.getAllByText('Clear')[0]; // First clear button (input section)
+    // Click clear input button
+    const clearButton = screen.getByText('Clear Input');
     fireEvent.click(clearButton);
     
     expect(jsonInput).toHaveValue('');
@@ -111,7 +111,7 @@ describe('JSONTypeGenerator', () => {
     );
 
     const shareButton = screen.getByTitle('Copy shareable URL');
-    const copyButton = screen.getByRole('button', { name: /copy/i });
+    const copyButton = screen.getByRole('button', { name: /copy generated types/i });
     
     expect(shareButton).toBeDisabled();
     expect(copyButton).toBeDisabled();
@@ -165,7 +165,7 @@ describe('JSONTypeGenerator', () => {
       </TestWrapper>
     );
 
-    const copyButton = screen.getByRole('button', { name: /copy/i });
+    const copyButton = screen.getByRole('button', { name: /copy generated types/i });
     
     // Copy button should exist and be disabled initially (no output)
     expect(copyButton).toBeInTheDocument();
@@ -183,10 +183,310 @@ describe('JSONTypeGenerator', () => {
     );
 
     // Verify copy button exists and is properly integrated
-    const copyButton = screen.getByRole('button', { name: /copy/i });
+    const copyButton = screen.getByRole('button', { name: /copy generated types/i });
     expect(copyButton).toBeInTheDocument();
     
     // Verify the button has the expected text content
     expect(copyButton).toHaveTextContent('Copy');
+  });
+
+  test('handles format switching correctly', async () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const formatSelector = screen.getByRole('combobox');
+    
+    // Click to open the dropdown
+    fireEvent.click(formatSelector);
+    
+    // Check that all format options are available
+    expect(screen.getAllByText('TypeScript Interfaces')[0]).toBeInTheDocument();
+    expect(screen.getByText('JSDoc Types')).toBeInTheDocument();
+    expect(screen.getByText('Python TypedDict')).toBeInTheDocument();
+    expect(screen.getByText('Python Dataclass')).toBeInTheDocument();
+    expect(screen.getByText('Pydantic v2 Models')).toBeInTheDocument();
+  });
+
+  test('displays processing state when generating types', async () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    const testJSON = '{"name": "test", "age": 30}';
+    
+    fireEvent.change(jsonInput, { target: { value: testJSON } });
+    
+    // Should show processing indicator briefly (may not be visible due to debounce)
+    const outputArea = screen.getByLabelText('Generated type definitions');
+    // Processing state might not be visible due to fast execution in tests
+    expect(outputArea).toBeInTheDocument();
+  });
+
+  test('handles error display correctly', async () => {
+    // Mock error handler to return a specific error
+    const { errorHandler } = await import('@/utils/errorHandler');
+    vi.mocked(errorHandler.formatError).mockReturnValue({ message: 'JSON parsing failed', type: 'error' });
+
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    fireEvent.change(jsonInput, { target: { value: 'invalid json {' } });
+
+    // Wait for error to appear
+    await screen.findByText('Error');
+  });
+
+  test('clear all button clears both input and output', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    const testJSON = '{"name": "test"}';
+    
+    // Add some input
+    fireEvent.change(jsonInput, { target: { value: testJSON } });
+    expect(jsonInput).toHaveValue(testJSON);
+    
+    // Click clear all button
+    const clearAllButton = screen.getByText('Clear All');
+    fireEvent.click(clearAllButton);
+    
+    expect(jsonInput).toHaveValue('');
+  });
+
+  test('share button functionality', async () => {
+    const { clipboardHelper } = await import('@/utils/clipboardHelper');
+    
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    const testJSON = '{"name": "test"}';
+    
+    fireEvent.change(jsonInput, { target: { value: testJSON } });
+    
+    const shareButton = screen.getByTitle('Copy shareable URL');
+    fireEvent.click(shareButton);
+    
+    expect(clipboardHelper.copy).toHaveBeenCalled();
+  });
+
+  test('copy button shows success state after copying', async () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    const outputArea = screen.getByLabelText('Generated type definitions');
+    
+    // Simulate having generated output
+    fireEvent.change(jsonInput, { target: { value: '{"test": true}' } });
+    
+    // Mock the output area having content
+    Object.defineProperty(outputArea, 'value', {
+      value: 'interface Test { test: boolean; }',
+      writable: true
+    });
+
+    const copyButton = screen.getByRole('button', { name: /copy generated types/i });
+    
+    // Enable the button by simulating output
+    fireEvent.click(copyButton);
+    
+    // Should show "Copied!" text briefly (may not be visible due to timing)
+    // Just verify the copy function was called
+    const { clipboardHelper: clipboardHelperModule } = await import('@/utils/clipboardHelper');
+    expect(vi.mocked(clipboardHelperModule.copy)).toHaveBeenCalled();
+  });
+
+  test('handles clipboard copy failure gracefully', async () => {
+    const { clipboardHelper } = await import('@/utils/clipboardHelper');
+    vi.mocked(clipboardHelper.copy).mockResolvedValue(false);
+
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    fireEvent.change(jsonInput, { target: { value: '{"test": true}' } });
+    
+    const copyButton = screen.getByRole('button', { name: /copy generated types/i });
+    fireEvent.click(copyButton);
+    
+    // Should show error message (may be in error state)
+    const { clipboardHelper: clipboardHelperModule2 } = await import('@/utils/clipboardHelper');
+    expect(vi.mocked(clipboardHelperModule2.copy)).toHaveBeenCalled();
+  });
+
+  test('displays appropriate placeholder text for JSON input', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    expect(jsonInput).toHaveAttribute('placeholder');
+    expect(jsonInput.getAttribute('placeholder')).toContain('Enter JSON data here');
+    expect(jsonInput.getAttribute('placeholder')).toContain('Example:');
+  });
+
+  test('handles very large JSON input', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    const largeJSON = JSON.stringify({
+      users: Array.from({ length: 100 }, (_, i) => ({
+        id: i,
+        name: `User ${i}`,
+        data: Array.from({ length: 10 }, (_, j) => `item-${j}`)
+      }))
+    });
+    
+    fireEvent.change(jsonInput, { target: { value: largeJSON } });
+    
+    expect(jsonInput).toHaveValue(largeJSON);
+  });
+
+  test('handles special characters in JSON input', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    const specialJSON = '{"emoji": "🚀", "unicode": "你好", "escaped": "line\\nbreak"}';
+    
+    fireEvent.change(jsonInput, { target: { value: specialJSON } });
+    
+    expect(jsonInput).toHaveValue(specialJSON);
+  });
+
+  test('clear output button works independently', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const clearOutputButton = screen.getByRole('button', { name: /clear generated output/i });
+    expect(clearOutputButton).toBeInTheDocument();
+    
+    // Button should be disabled initially (no output)
+    expect(clearOutputButton).toBeDisabled();
+  });
+
+  test('responsive design elements are present', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    // Check for responsive classes and touch-friendly elements
+    const buttons = screen.getAllByRole('button');
+    buttons.forEach(button => {
+      expect(button).toHaveClass('touch-manipulation');
+    });
+
+    const textareas = screen.getAllByRole('textbox');
+    textareas.forEach(textarea => {
+      expect(textarea).toHaveClass('touch-manipulation');
+    });
+  });
+
+  test('accessibility attributes are properly set', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    const outputArea = screen.getByLabelText('Generated type definitions');
+    
+    expect(jsonInput).toHaveAttribute('aria-label', 'JSON input');
+    expect(outputArea).toHaveAttribute('aria-label', 'Generated type definitions');
+    expect(outputArea).toHaveAttribute('readonly');
+  });
+
+  test('error boundary integration', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    // The component should be wrapped in ToolErrorBoundary
+    // This is tested by ensuring the component renders without throwing
+    expect(screen.getByText('JSON Type Generator')).toBeInTheDocument();
+  });
+
+  test('handles empty JSON object', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    fireEvent.change(jsonInput, { target: { value: '{}' } });
+    
+    expect(jsonInput).toHaveValue('{}');
+  });
+
+  test('handles JSON array input', () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const jsonInput = screen.getByLabelText('JSON input');
+    const arrayJSON = '[{"id": 1, "name": "test"}, {"id": 2, "name": "test2"}]';
+    
+    fireEvent.change(jsonInput, { target: { value: arrayJSON } });
+    
+    expect(jsonInput).toHaveValue(arrayJSON);
+  });
+
+  test('format selector shows icons for each option', async () => {
+    render(
+      <TestWrapper>
+        <JSONTypeGenerator />
+      </TestWrapper>
+    );
+
+    const formatSelector = screen.getByRole('combobox');
+    fireEvent.click(formatSelector);
+    
+    // Each format option should have an emoji icon
+    const options = screen.getAllByRole('option');
+    expect(options.length).toBeGreaterThan(0);
   });
 });

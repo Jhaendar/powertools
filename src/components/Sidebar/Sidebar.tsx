@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Home, Code2, FileText, Table, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, Home, Code2, FileText, Table, X, GitCompare } from 'lucide-react';
 import { useToolRegistry } from '../../contexts/ToolRegistryContext';
 import { Button } from '../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
@@ -35,7 +35,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) =
     setExpandedCategories(newExpanded);
   };
 
-  const getToolIcon = (toolId: string) => {
+  const getToolIcon = (toolId: string, iconName?: string) => {
+    // Use the icon from the tool definition if available
+    if (iconName === 'GitCompare') {
+      return <GitCompare className="h-4 w-4" />;
+    }
+    
+    // Fallback to tool-specific icons
     switch (toolId) {
       case 'json-converter':
         return <Code2 className="h-4 w-4" />;
@@ -43,6 +49,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) =
         return <FileText className="h-4 w-4" />;
       case 'csv-viewer':
         return <Table className="h-4 w-4" />;
+      case 'json-type-generator':
+        return <Code2 className="h-4 w-4" />;
+      case 'diff-checker':
+        return <GitCompare className="h-4 w-4" />;
       default:
         return <Code2 className="h-4 w-4" />;
     }
@@ -124,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) =
               <CollapsibleContent className="space-y-1 ml-2 mt-1">
                 {tools.map((tool) => (
                   <NavLink key={tool.id} to={tool.path}>
-                    {getToolIcon(tool.id)}
+                    {getToolIcon(tool.id, tool.icon)}
                     {tool.name}
                   </NavLink>
                 ))}

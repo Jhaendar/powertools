@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -184,6 +184,17 @@ const JSONTypeGeneratorCore: React.FC = () => {
     setIsCopied(false);
   };
 
+  // Handle clearing all data (including persistent state)
+  const handleClearAll = () => {
+    setJsonInput('');
+    setPersistentState({
+      selectedFormat: 'typescript' as const,
+      generatedOutput: '',
+      error: null
+    });
+    setIsCopied(false);
+  };
+
   // Handle share functionality
   const handleShare = async () => {
     try {
@@ -204,6 +215,20 @@ const JSONTypeGeneratorCore: React.FC = () => {
     setPersistentState({ generatedOutput: '' });
     setIsCopied(false);
   };
+
+  // Keyboard shortcuts
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Ctrl/Cmd + K to clear all
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      handleClearAll();
+    }
+    // Ctrl/Cmd + Shift + C to copy output
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C' && generatedOutput) {
+      e.preventDefault();
+      handleCopy();
+    }
+  }, [handleClearAll, handleCopy, generatedOutput]);
 
   // Memoized placeholder text for JSON input
   const jsonPlaceholderText = useMemo(() => {
@@ -242,13 +267,13 @@ Example:
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" onKeyDown={handleKeyDown}>
       <div>
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Code2Icon className="h-6 w-6" />
+        <h1 className="text-2xl font-bold flex items-center gap-2" id="json-type-generator-title">
+          <Code2Icon className="h-6 w-6" aria-hidden="true" />
           JSON Type Generator
-        </h2>
-        <p className="text-muted-foreground mt-2">
+        </h1>
+        <p className="text-muted-foreground mt-2" id="json-type-generator-description">
           Generate type definitions from JSON data in multiple languages and formats
         </p>
       </div>
@@ -261,9 +286,14 @@ Example:
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex items-center gap-2 flex-1">
-              <span className="text-sm text-muted-foreground whitespace-nowrap">Format:</span>
+              <label htmlFor="format-select" className="text-sm text-muted-foreground whitespace-nowrap">Format:</label>
+              <div id="format-description" className="sr-only">Choose the output format for generated type definitions</div>
               <Select value={selectedFormat} onValueChange={handleFormatChange}>
-                <SelectTrigger className="touch-manipulation min-h-[44px]">
+                <SelectTrigger 
+                  className="touch-manipulation min-h-[44px]"
+                  aria-label="Select output format"
+                  aria-describedby="format-description"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -295,9 +325,10 @@ Example:
                   onClick={handleShare}
                   disabled={!jsonInput}
                   title="Copy shareable URL"
+                  aria-label="Copy shareable URL to clipboard"
                   className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  <ShareIcon className="h-4 w-4" />
+                  <ShareIcon className="h-4 w-4" aria-hidden="true" />
                   <span className="ml-2">Share</span>
                 </Button>
                 <Button
@@ -305,10 +336,22 @@ Example:
                   size="sm"
                   onClick={handleClearInput}
                   disabled={!jsonInput}
+                  aria-label="Clear JSON input"
                   className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  <TrashIcon className="h-4 w-4" />
-                  <span className="ml-2">Clear</span>
+                  <TrashIcon className="h-4 w-4" aria-hidden="true" />
+                  <span className="ml-2">Clear Input</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearAll}
+                  disabled={!jsonInput && !generatedOutput}
+                  aria-label="Clear both input and output"
+                  className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
+                >
+                  <TrashIcon className="h-4 w-4" aria-hidden="true" />
+                  <span className="ml-2">Clear All</span>
                 </Button>
               </div>
             </div>
@@ -328,7 +371,12 @@ Example:
               placeholder={jsonPlaceholderText}
               className="min-h-[200px] sm:min-h-[300px] font-mono text-sm touch-manipulation"
               aria-label="JSON input"
+              aria-describedby="json-input-description"
+              id="json-input"
             />
+            <div id="json-input-description" className="sr-only">
+              Enter JSON data to generate type definitions. The tool will automatically validate and process your input.
+            </div>
           </CardContent>
         </Card>
 
@@ -339,7 +387,10 @@ Example:
               <CardTitle className="flex items-center gap-2">
                 Generated Types
                 {isProcessing && (
-                  <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                  <>
+                    <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" aria-hidden="true" />
+                    <span className="sr-only">Processing JSON input...</span>
+                  </>
                 )}
               </CardTitle>
               <div className="flex flex-wrap gap-2">
@@ -348,9 +399,10 @@ Example:
                   size="sm"
                   onClick={handleCopy}
                   disabled={!generatedOutput || isProcessing}
+                  aria-label={isCopied ? 'Copied to clipboard' : 'Copy generated types to clipboard'}
                   className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  {isCopied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
+                  {isCopied ? <CheckIcon className="h-4 w-4" aria-hidden="true" /> : <CopyIcon className="h-4 w-4" aria-hidden="true" />}
                   <span className="ml-2">{isCopied ? 'Copied!' : 'Copy'}</span>
                 </Button>
                 <Button
@@ -358,9 +410,10 @@ Example:
                   size="sm"
                   onClick={handleClearOutput}
                   disabled={!generatedOutput || isProcessing}
+                  aria-label="Clear generated output"
                   className="touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  <TrashIcon className="h-4 w-4" />
+                  <TrashIcon className="h-4 w-4" aria-hidden="true" />
                   <span className="ml-2">Clear</span>
                 </Button>
               </div>
@@ -373,7 +426,14 @@ Example:
               placeholder={outputPlaceholderText}
               className="min-h-[200px] sm:min-h-[300px] font-mono text-sm bg-muted/50 touch-manipulation"
               aria-label="Generated type definitions"
+              aria-describedby="output-description"
+              id="generated-output"
+              aria-live="polite"
+              aria-atomic="true"
             />
+            <div id="output-description" className="sr-only">
+              Generated type definitions based on your JSON input. This area updates automatically when you modify the input.
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -381,7 +441,7 @@ Example:
       {/* Info Section */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
             <div>
               <h4 className="font-medium text-foreground mb-2">Features:</h4>
               <ul className="space-y-1">
@@ -400,6 +460,13 @@ Example:
                 <li>• Python TypedDict</li>
                 <li>• Python dataclasses</li>
                 <li>• Pydantic v2 models</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-foreground mb-2">Keyboard shortcuts:</h4>
+              <ul className="space-y-1">
+                <li>• <kbd className="px-1 py-0.5 text-xs bg-muted rounded">Ctrl+K</kbd> Clear all</li>
+                <li>• <kbd className="px-1 py-0.5 text-xs bg-muted rounded">Ctrl+Shift+C</kbd> Copy output</li>
               </ul>
             </div>
           </div>

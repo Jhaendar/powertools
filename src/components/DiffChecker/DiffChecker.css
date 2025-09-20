@@ -1,0 +1,153 @@
+/* DiffChecker specific styles */
+
+/* Responsive layout adjustments */
+@media (max-width: 1024px) {
+  .diff-checker-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .diff-checker-container {
+    padding: 1rem;
+  }
+  
+  .diff-checker-textarea {
+    min-height: 200px;
+  }
+}
+
+/* Touch-friendly interface elements */
+@media (hover: none) and (pointer: coarse) {
+  .diff-checker-textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+/* GitHub-style diff output styling */
+.diff-output {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
+}
+
+.diff-content {
+  background: hsl(var(--background));
+}
+
+.diff-line {
+  min-height: 20px;
+  position: relative;
+}
+
+.diff-line:hover {
+  background-color: hsl(var(--muted) / 0.5) !important;
+}
+
+/* Line number styling */
+.diff-line-number {
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  background-color: hsl(var(--muted) / 0.3);
+  border-right: 1px solid hsl(var(--border));
+}
+
+/* Diff marker styling */
+.diff-marker {
+  font-weight: 600;
+  user-select: none;
+}
+
+/* Content styling */
+.diff-content {
+  font-family: inherit;
+  tab-size: 4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Added lines (green) */
+.diff-line:has(.diff-marker .text-green-600) {
+  background-color: hsl(142 76% 36% / 0.1);
+  border-left: 2px solid hsl(142 76% 36%);
+}
+
+.diff-line:has(.diff-marker .text-green-600):hover {
+  background-color: hsl(142 76% 36% / 0.15) !important;
+}
+
+/* Removed lines (red) */
+.diff-line:has(.diff-marker .text-red-600) {
+  background-color: hsl(0 84% 60% / 0.1);
+  border-left: 2px solid hsl(0 84% 60%);
+}
+
+.diff-line:has(.diff-marker .text-red-600):hover {
+  background-color: hsl(0 84% 60% / 0.15) !important;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .diff-line:has(.diff-marker .text-green-400) {
+    background-color: hsl(142 76% 36% / 0.15);
+    border-left-color: hsl(142 76% 36%);
+  }
+
+  .diff-line:has(.diff-marker .text-green-400):hover {
+    background-color: hsl(142 76% 36% / 0.2) !important;
+  }
+
+  .diff-line:has(.diff-marker .text-red-400) {
+    background-color: hsl(0 84% 60% / 0.15);
+    border-left-color: hsl(0 84% 60%);
+  }
+
+  .diff-line:has(.diff-marker .text-red-400):hover {
+    background-color: hsl(0 84% 60% / 0.2) !important;
+  }
+}
+
+/* Scrollbar styling for diff content */
+.diff-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.diff-content::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.3);
+}
+
+.diff-content::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+.diff-content::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Ensure proper text selection */
+.diff-content {
+  user-select: text;
+}
+
+.diff-line-number,
+.diff-marker {
+  user-select: none;
+}
+
+/* Accessibility improvements */
+.diff-line:focus-within {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: -2px;
+}
+
+/* Performance optimization for large diffs */
+.diff-content {
+  contain: layout style paint;
+}

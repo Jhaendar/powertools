@@ -1018,6 +1018,398 @@ describe('parseJSONSafely', () => {
   });
 
   it('should handle invalid JSON', () => {
+    const result = parseJSONSafely('{"name": "John", "age":}');
+    
+    expect(result.error).toBeTruthy();
+    expect(result.data).toBeNull();
+    expect(result.error).toContain('JSON');
+  });
+
+  it('should handle empty input', () => {
+    const result = parseJSONSafely('');
+    
+    expect(result.error).toBe('Input is empty');
+    expect(result.data).toBeNull();
+  });
+
+  it('should handle whitespace-only input', () => {
+    const result = parseJSONSafely('   \n\t  ');
+    
+    expect(result.error).toBe('Input is empty');
+    expect(result.data).toBeNull();
+  });
+
+  it('should parse complex nested JSON', () => {
+    const complexJSON = JSON.stringify({
+      users: [
+        { name: 'John', profile: { bio: 'Developer', tags: ['js', 'react'] } },
+        { name: 'Jane', profile: null }
+      ],
+      metadata: { version: 1.0, active: true }
+    });
+    
+    const result = parseJSONSafely(complexJSON);
+    
+    expect(result.error).toBeNull();
+    expect(result.data.users).toHaveLength(2);
+    expect(result.data.users[0].profile.tags).toEqual(['js', 'react']);
+  });
+
+  it('should handle JSON with special characters', () => {
+    const result = parseJSONSafely('{"message": "Hello\\nWorld\\t!"}');
+    
+    expect(result.error).toBeNull();
+    expect(result.data.message).toBe('Hello\nWorld\t!');
+  });
+
+  it('should handle JSON with unicode characters', () => {
+    const result = parseJSONSafely('{"emoji": "🚀", "chinese": "你好"}');
+    
+    expect(result.error).toBeNull();
+    expect(result.data.emoji).toBe('🚀');
+    expect(result.data.chinese).toBe('你好');
+  });
+
+  it('should handle very large numbers', () => {
+    const result = parseJSONSafely('{"bigNumber": 9007199254740991, "decimal": 3.141592653589793}');
+    
+    expect(result.error).toBeNull();
+    expect(result.data.bigNumber).toBe(9007199254740991);
+    expect(result.data.decimal).toBe(3.141592653589793);
+  });
+
+  it('should handle arrays with mixed types', () => {
+    const result = parseJSONSafely('{"mixed": [1, "string", true, null, {"nested": "object"}]}');
+    
+    expect(result.error).toBeNull();
+    expect(result.data.mixed).toHaveLength(5);
+    expect(result.data.mixed[4].nested).toBe('object');
+  });
+});
+
+// Additional edge case tests for analyzeJSONStructure
+describe('analyzeJSONStructure - Edge Cases', () => {
+  it('should handle deeply nested objects', () => {
+    const deepObject = {
+      level1: {
+        level2: {
+          level3: {
+            level4: {
+              value: 'deep'
+            }
+          }
+        }
+      }
+    };
+    
+    const schema = analyzeJSONStructure(deepObject);
+    
+    expect(schema.type).toBe('object');
+    expect(schema.properties!.level1.type).toBe('object');
+    expect(schema.properties!.level1.properties!.level2.type).toBe('object');
+    expect(schema.properties!.level1.properties!.level2.properties!.level3.type).toBe('object');
+    expect(schema.properties!.level1.properties!.level2.properties!.level3.properties!.level4.type).toBe('object');
+    expect(schema.properties!.level1.properties!.level2.properties!.level3.properties!.level4.properties!.value.type).toBe('string');
+  });
+
+  it('should handle arrays with complex mixed types', () => {
+    const data = [
+      { type: 'user', name: 'John' },
+      { type: 'admin', name: 'Jane', permissions: ['read', 'write'] },
+      null,
+      'string item'
+    ];
+    
+    const schema = analyzeJSONStructure(data);
+    
+    expect(schema.type).toBe('array');
+    // Should default to string | null for mixed arrays
+    expect(schema.items!.type).toBe('string');
+    expect(schema.items!.nullable).toBe(true);
+  });
+
+  it('should handle objects with numeric keys', () => {
+    const data = {
+      '0': 'first',
+      '1': 'second',
+      '10': 'tenth',
+      'normal_key': 'value'
+    };
+    
+    const schema = analyzeJSONStructure(data);
+    
+    expect(schema.type).toBe('object');
+    expect(schema.properties!['0'].type).toBe('string');
+    expect(schema.properties!['1'].type).toBe('string');
+    expect(schema.properties!['10'].type).toBe('string');
+    expect(schema.properties!.normal_key.type).toBe('string');
+  });
+
+  it('should handle objects with special character keys', () => {
+    const data = {
+      'key-with-dashes': 'value1',
+      'key_with_underscores': 'value2',
+      'key with spaces': 'value3',
+      'key.with.dots': 'value4',
+      '@special': 'value5',
+      '$dollar': 'value6'
+    };
+    
+    const schema = analyzeJSONStructure(data);
+    
+    expect(schema.type).toBe('object');
+    expect(schema.properties!['key-with-dashes'].type).toBe('string');
+    expect(schema.properties!['key_with_underscores'].type).toBe('string');
+    expect(schema.properties!['key with spaces'].type).toBe('string');
+    expect(schema.properties!['key.with.dots'].type).toBe('string');
+    expect(schema.properties!['@special'].type).toBe('string');
+    expect(schema.properties!['$dollar'].type).toBe('string');
+  });
+
+  it('should handle very large arrays', () => {
+    const largeArray = Array.from({ length: 1000 }, (_, i) => ({ id: i, value: `item-${i}` }));
+    
+    const schema = analyzeJSONStructure(largeArray);
+    
+    expect(schema.type).toBe('array');
+    expect(schema.items!.type).toBe('object');
+    expect(schema.items!.properties!.id.type).toBe('number');
+    expect(schema.items!.properties!.value.type).toBe('string');
+  });
+
+  it('should handle objects with undefined-like values', () => {
+    const data = {
+      nullValue: null,
+      emptyString: '',
+      zeroNumber: 0,
+      falseBoolean: false,
+      emptyArray: [],
+      emptyObject: {}
+    };
+    
+    const schema = analyzeJSONStructure(data);
+    
+    expect(schema.properties!.nullValue.type).toBe('null');
+    expect(schema.properties!.emptyString.type).toBe('string');
+    expect(schema.properties!.zeroNumber.type).toBe('number');
+    expect(schema.properties!.falseBoolean.type).toBe('boolean');
+    expect(schema.properties!.emptyArray.type).toBe('array');
+    expect(schema.properties!.emptyObject.type).toBe('object');
+    
+    // Only null should not be in required
+    expect(schema.required).toEqual(['emptyString', 'zeroNumber', 'falseBoolean', 'emptyArray', 'emptyObject']);
+  });
+
+  it('should handle arrays with inconsistent object structures', () => {
+    const data = [
+      { name: 'John', age: 30 },
+      { name: 'Jane', email: 'jane@example.com' },
+      { name: 'Bob', age: 25, email: 'bob@example.com', active: true }
+    ];
+    
+    const schema = analyzeJSONStructure(data);
+    
+    expect(schema.type).toBe('array');
+    expect(schema.items!.type).toBe('object');
+    
+    // Should merge all properties from all objects
+    const itemProperties = schema.items!.properties!;
+    expect(itemProperties.name.type).toBe('string');
+    expect(itemProperties.age.type).toBe('number');
+    expect(itemProperties.email.type).toBe('string');
+    expect(itemProperties.active.type).toBe('boolean');
+    
+    // Only name appears in all objects, so it should be the only required field
+    expect(schema.items!.required).toEqual(['name']);
+  });
+});
+
+// Additional edge case tests for TypeScript generation
+describe('generateTypeScriptInterface - Edge Cases', () => {
+  it('should handle interfaces with reserved TypeScript keywords', () => {
+    const schema = {
+      type: 'object' as const,
+      properties: {
+        class: { type: 'string' as const },
+        interface: { type: 'string' as const },
+        type: { type: 'string' as const },
+        function: { type: 'string' as const }
+      },
+      required: ['class', 'interface']
+    };
+
+    const result = generateTypeScriptInterface(schema, {
+      format: 'typescript',
+      rootTypeName: 'ReservedWords',
+      useOptionalFields: true
+    });
+
+    // Should handle reserved words as property names
+    expect(result.content).toContain('class: string;');
+    expect(result.content).toContain('interface: string;');
+    expect(result.content).toContain('type?: string;');
+    expect(result.content).toContain('function?: string;');
+  });
+
+  it('should handle very deep nesting without stack overflow', () => {
+    // Create a deeply nested schema
+    let currentSchema: any = { type: 'string' };
+    for (let i = 0; i < 20; i++) {
+      currentSchema = {
+        type: 'object',
+        properties: {
+          [`level${i}`]: currentSchema
+        },
+        required: [`level${i}`]
+      };
+    }
+
+    const result = generateTypeScriptInterface(currentSchema, {
+      format: 'typescript',
+      rootTypeName: 'DeepNesting',
+      useOptionalFields: true
+    });
+
+    expect(result.content).toContain('interface DeepNesting');
+    expect(result.content).toContain('level0: string');
+    // Should generate multiple nested interfaces
+    expect(result.content.split('interface').length).toBeGreaterThan(10);
+  });
+
+  it('should handle empty objects and arrays correctly', () => {
+    const schema = {
+      type: 'object' as const,
+      properties: {
+        emptyObject: {
+          type: 'object' as const,
+          properties: {}
+        },
+        emptyArray: {
+          type: 'array' as const,
+          items: { type: 'null' as const }
+        }
+      }
+    };
+
+    const result = generateTypeScriptInterface(schema, {
+      format: 'typescript',
+      rootTypeName: 'EmptyStructures',
+      useOptionalFields: true
+    });
+
+    expect(result.content).toContain('emptyObject?: Record<string, unknown>;');
+    expect(result.content).toContain('emptyArray?: null[];');
+  });
+});
+
+// Additional edge case tests for Python generators
+describe('Python Generators - Edge Cases', () => {
+  it('should handle Python reserved keywords in TypedDict', () => {
+    const schema = {
+      type: 'object' as const,
+      properties: {
+        class: { type: 'string' as const },
+        def: { type: 'string' as const },
+        import: { type: 'string' as const },
+        from: { type: 'string' as const }
+      }
+    };
+
+    const result = generatePythonTypedDict(schema, {
+      format: 'python-typeddict',
+      rootTypeName: 'ReservedWords',
+      useOptionalFields: true
+    });
+
+    // Should handle reserved words as field names (they're valid in TypedDict)
+    expect(result.content).toContain('class: str');
+    expect(result.content).toContain('def: str');
+    expect(result.content).toContain('import: str');
+    expect(result.content).toContain('from: str');
+  });
+
+  it('should handle very large numbers in Python types', () => {
+    const schema = {
+      type: 'object' as const,
+      properties: {
+        bigInt: { type: 'number' as const },
+        decimal: { type: 'number' as const },
+        scientific: { type: 'number' as const }
+      }
+    };
+
+    const result = generatePythonDataclass(schema, {
+      format: 'python-dataclass',
+      rootTypeName: 'Numbers',
+      useOptionalFields: true
+    });
+
+    // All numbers should be float in Python
+    expect(result.content).toContain('bigInt: float');
+    expect(result.content).toContain('decimal: float');
+    expect(result.content).toContain('scientific: float');
+  });
+
+  it('should handle complex nested structures in Pydantic', () => {
+    const schema = {
+      type: 'object' as const,
+      properties: {
+        users: {
+          type: 'array' as const,
+          items: {
+            type: 'object' as const,
+            properties: {
+              profile: {
+                type: 'object' as const,
+                properties: {
+                  settings: {
+                    type: 'object' as const,
+                    properties: {
+                      theme: { type: 'string' as const },
+                      notifications: {
+                        type: 'array' as const,
+                        items: {
+                          type: 'object' as const,
+                          properties: {
+                            type: { type: 'string' as const },
+                            enabled: { type: 'boolean' as const }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    const result = generatePydanticModel(schema, {
+      format: 'pydantic-v2',
+      rootTypeName: 'ComplexApp',
+      useOptionalFields: true
+    });
+
+    expect(result.content).toContain('class ComplexApp(BaseModel):');
+    expect(result.content).toContain('users: list[ComplexAppNested] = Field(default_factory=list)');
+    expect(result.content).toContain('from pydantic import BaseModel, Field');
+    
+    // Should generate multiple nested models
+    expect(result.content.split('class ComplexAppNested').length).toBeGreaterThan(1);
+  });
+});
+
+describe('parseJSONSafely', () => {
+  it('should parse valid JSON', () => {
+    const result = parseJSONSafely('{"name": "John", "age": 30}');
+    
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({ name: 'John', age: 30 });
+  });
+
+  it('should handle invalid JSON', () => {
     const result = parseJSONSafely('{"name": "John", age: 30}'); // Missing quotes
     
     expect(result.error).toBeTruthy();

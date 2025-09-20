@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, Home, Code2 } from 'lucide-react';
+import { Menu, Home, Code2, GitCompare } from 'lucide-react';
 import { useToolRegistry } from '../../contexts/ToolRegistryContext';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
@@ -49,12 +49,15 @@ export const Navigation: React.FC = () => {
         <div className="px-3 py-2">
           <h4 className="text-sm font-semibold text-muted-foreground">Tools</h4>
         </div>
-        {tools.map((tool) => (
-          <NavLink key={tool.id} to={tool.path} onClick={() => setIsOpen(false)}>
-            <Code2 className="h-4 w-4" />
-            {tool.name}
-          </NavLink>
-        ))}
+        {tools.map((tool) => {
+          const IconComponent = tool.icon === 'GitCompare' ? GitCompare : Code2;
+          return (
+            <NavLink key={tool.id} to={tool.path} onClick={() => setIsOpen(false)}>
+              <IconComponent className="h-4 w-4" />
+              {tool.name}
+            </NavLink>
+          );
+        })}
       </div>
     </>
   );
@@ -77,12 +80,15 @@ export const Navigation: React.FC = () => {
           Home
         </NavLink>
         
-        {tools.map((tool) => (
-          <NavLink key={tool.id} to={tool.path}>
-            <Code2 className="h-4 w-4" />
-            {tool.name}
-          </NavLink>
-        ))}
+        {tools.map((tool) => {
+          const IconComponent = tool.icon === 'GitCompare' ? GitCompare : Code2;
+          return (
+            <NavLink key={tool.id} to={tool.path}>
+              <IconComponent className="h-4 w-4" />
+              {tool.name}
+            </NavLink>
+          );
+        })}
       </div>
 
       {/* Mobile Navigation */}
