@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -22,20 +22,36 @@ import {
 } from '@/utils/jsonTypeGenerator';
 
 const JSONTypeGeneratorCore: React.FC = () => {
-  // Use persistent state for main tool state
-  const [persistentState, setPersistentState] = usePersistentState<JSONTypeGeneratorState>('json-type-generator', {
-    jsonInput: '',
+  // Use persistent state for main tool state (excluding jsonInput to avoid cursor jumping)
+  const [persistentState, setPersistentState] = usePersistentState<Omit<JSONTypeGeneratorState, 'jsonInput'>>('json-type-generator', {
     selectedFormat: 'typescript' as const,
     generatedOutput: '',
     error: null
   });
 
-  // Local state for UI feedback
+  // Local state for input (to prevent cursor jumping) and UI feedback
+  const [jsonInput, setJsonInput] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Extract values from persistent state
-  const { jsonInput, selectedFormat, generatedOutput, error } = persistentState;
+  const { selectedFormat, generatedOutput, error } = persistentState;
+
+  // Initialize jsonInput from URL parameters on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const stateParam = urlParams.get('state');
+    if (stateParam) {
+      try {
+        const decodedState = JSON.parse(decodeURIComponent(stateParam));
+        if (decodedState.jsonInput) {
+          setJsonInput(decodedState.jsonInput);
+        }
+      } catch (err) {
+        // Ignore URL parsing errors
+      }
+    }
+  }, []);
 
   // Format options for the selector
   const formatOptions = useMemo(() => [
@@ -46,9 +62,9 @@ const JSONTypeGeneratorCore: React.FC = () => {
     { value: 'pydantic-v2', label: 'Pydantic v2 Models', icon: '⚡' }
   ] as const, []);
 
-  // Debounced JSON processing function
-  const processJSON = useCallback(
-    async (input: string, format: JSONTypeGeneratorState['selectedFormat']) => {
+  // Debounced effect for JSON processing
+  useEffect(() => {
+    const processJSON = async (input: string, format: JSONTypeGeneratorState['selectedFormat']) => {
       if (!input.trim()) {
         setPersistentState({ 
           generatedOutput: '',
@@ -116,25 +132,19 @@ const JSONTypeGeneratorCore: React.FC = () => {
       } finally {
         setIsProcessing(false);
       }
-    },
-    [setPersistentState]
-  );
+    };
 
-  // Debounced effect for JSON processing
-  useEffect(() => {
     const timeoutId = setTimeout(() => {
       processJSON(jsonInput, selectedFormat);
     }, 300); // 300ms debounce delay
 
     return () => clearTimeout(timeoutId);
-  }, [jsonInput, selectedFormat, processJSON]);
+  }, [jsonInput, selectedFormat]);
 
   // Handle JSON input change
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newInput = e.target.value;
-    setPersistentState({ 
-      jsonInput: newInput
-    });
+    setJsonInput(newInput); // Only update local state to prevent re-renders
     setIsCopied(false); // Clear copy success state
   };
 
@@ -166,8 +176,8 @@ const JSONTypeGeneratorCore: React.FC = () => {
 
   // Handle clear input
   const handleClearInput = () => {
+    setJsonInput(''); // Clear local input state
     setPersistentState({ 
-      jsonInput: '',
       generatedOutput: '',
       error: null
     });
@@ -177,7 +187,9 @@ const JSONTypeGeneratorCore: React.FC = () => {
   // Handle share functionality
   const handleShare = async () => {
     try {
-      const shareableURL = generateShareableURL('/json-type-generator', persistentState);
+      // Include current jsonInput in the shareable state
+      const shareableState = { ...persistentState, jsonInput };
+      const shareableURL = generateShareableURL('/json-type-generator', shareableState);
       await clipboardHelper.copy(shareableURL);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
@@ -225,61 +237,7 @@ Example:
     return `Generated ${formatLabels[selectedFormat]} will appear here...`;
   }, [selectedFormat]);
 
-  // Simple syntax highlighting function for generated output
-  const applySyntaxHighlighting = (code: string, format: JSONTypeGeneratorState['selectedFormat']): string => {
-    if (!code || isProcessing) return code;
 
-    // Escape HTML to prevent XSS
-    const escapeHtml = (text: string) => {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    };
-
-    const escapedCode = escapeHtml(code);
-    let highlightedCode = escapedCode;
-
-    switch (format) {
-      case 'typescript':
-        // TypeScript syntax highlighting
-        highlightedCode = highlightedCode
-          .replace(/\b(interface|type|export|import|from)\b/g, '<span class="text-blue-600 font-semibold">$1</span>')
-          .replace(/\b(string|number|boolean|null|undefined|Array|Record|unknown)\b/g, '<span class="text-emerald-600 font-medium">$1</span>')
-          .replace(/(\w+)(\s*\??\s*:)/g, '<span class="text-purple-600">$1</span>$2')
-          .replace(/(\|)/g, '<span class="text-orange-500 font-bold">$1</span>')
-          .replace(/([{}[\];,])/g, '<span class="text-gray-600">$1</span>');
-        break;
-
-      case 'jsdoc':
-        // JSDoc syntax highlighting
-        highlightedCode = highlightedCode
-          .replace(/(\/\*\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>')
-          .replace(/(@typedef|@property)/g, '<span class="text-blue-600 font-semibold">$1</span>')
-          .replace(/\{([^}]+)\}/g, '{<span class="text-emerald-600 font-medium">$1</span>}')
-          .replace(/\[(\w+)\]/g, '[<span class="text-purple-600">$1</span>]');
-        break;
-
-      case 'python-typeddict':
-      case 'python-dataclass':
-      case 'pydantic-v2':
-        // Python syntax highlighting
-        highlightedCode = highlightedCode
-          .replace(/\b(from|import|class|def|return)\b/g, '<span class="text-blue-600 font-semibold">$1</span>')
-          .replace(/\b(None|True|False)\b/g, '<span class="text-purple-600 font-semibold">$1</span>')
-          .replace(/\b(TypedDict|dataclass|BaseModel|Field|field|default_factory)\b/g, '<span class="text-orange-600 font-medium">$1</span>')
-          .replace(/\b(str|int|float|bool|list|dict|object)\b/g, '<span class="text-emerald-600 font-medium">$1</span>')
-          .replace(/(\w+)(\s*:)/g, '<span class="text-purple-600">$1</span>$2')
-          .replace(/(@\w+)/g, '<span class="text-yellow-600 font-semibold">$1</span>')
-          .replace(/(#.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
-          .replace(/([{}[\](),=])/g, '<span class="text-gray-600">$1</span>');
-        break;
-
-      default:
-        return escapedCode;
-    }
-
-    return highlightedCode;
-  };
 
 
 
@@ -409,23 +367,13 @@ Example:
             </div>
           </CardHeader>
           <CardContent>
-            {generatedOutput && !isProcessing ? (
-              <div 
-                className="min-h-[200px] sm:min-h-[300px] font-mono text-sm bg-muted/50 border border-input rounded-md p-3 overflow-auto whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ 
-                  __html: applySyntaxHighlighting(generatedOutput, selectedFormat) 
-                }}
-                aria-label="Generated type definitions with syntax highlighting"
-              />
-            ) : (
-              <Textarea
-                value={isProcessing ? 'Processing...' : ''}
-                readOnly
-                placeholder={outputPlaceholderText}
-                className="min-h-[200px] sm:min-h-[300px] font-mono text-sm bg-muted/50 touch-manipulation"
-                aria-label="Generated type definitions"
-              />
-            )}
+            <Textarea
+              value={isProcessing ? 'Processing...' : generatedOutput}
+              readOnly
+              placeholder={outputPlaceholderText}
+              className="min-h-[200px] sm:min-h-[300px] font-mono text-sm bg-muted/50 touch-manipulation"
+              aria-label="Generated type definitions"
+            />
           </CardContent>
         </Card>
       </div>
