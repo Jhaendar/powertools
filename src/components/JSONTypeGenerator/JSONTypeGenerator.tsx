@@ -218,8 +218,8 @@ const JSONTypeGeneratorCore: React.FC = () => {
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    // Ctrl/Cmd + K to clear all
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    // Ctrl/Cmd + Shift + K to clear all
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'K') {
       e.preventDefault();
       handleClearAll();
     }

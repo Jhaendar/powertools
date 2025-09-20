@@ -72,22 +72,22 @@
 }
 
 /* Added lines (green) */
-.diff-line:has(.diff-marker .text-green-600) {
+.diff-line-added {
   background-color: hsl(142 76% 36% / 0.1);
   border-left: 2px solid hsl(142 76% 36%);
 }
 
-.diff-line:has(.diff-marker .text-green-600):hover {
+.diff-line-added:hover {
   background-color: hsl(142 76% 36% / 0.15) !important;
 }
 
 /* Removed lines (red) */
-.diff-line:has(.diff-marker .text-red-600) {
+.diff-line-removed {
   background-color: hsl(0 84% 60% / 0.1);
   border-left: 2px solid hsl(0 84% 60%);
 }
 
-.diff-line:has(.diff-marker .text-red-600):hover {
+.diff-line-removed:hover {
   background-color: hsl(0 84% 60% / 0.15) !important;
 }
 
