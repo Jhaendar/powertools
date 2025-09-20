@@ -4,6 +4,7 @@
 export { default as JSONConverter } from './JSONConverter/JSONConverter';
 export { default as JSONVisualizer } from './JSONVisualizer/JSONVisualizer';
 export { default as CSVViewer } from './CSVViewer/CSVViewer';
+export { default as JSONTypeGenerator } from './JSONTypeGenerator/JSONTypeGenerator';
 
 // Layout components
 export { default as Layout } from './Layout/Layout';

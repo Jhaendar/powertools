@@ -63,3 +63,45 @@ export interface ValidationResult {
   isValid: boolean;
   error?: string;
 }
+
+// JSON Type Generator types
+export interface JSONTypeGeneratorState {
+  jsonInput: string;
+  selectedFormat: 'typescript' | 'jsdoc' | 'python-typeddict' | 'python-dataclass' | 'pydantic-v2';
+  generatedOutput: string;
+  error: string | null;
+}
+
+export interface TypeGenerationOptions {
+  format: JSONTypeGeneratorState['selectedFormat'];
+  rootTypeName: string;
+  useOptionalFields: boolean;
+}
+
+export interface JSONSchema {
+  type: 'object' | 'array' | 'string' | 'number' | 'boolean' | 'null';
+  properties?: Record<string, JSONSchema>;
+  items?: JSONSchema;
+  required?: string[];
+  nullable?: boolean;
+}
+
+export interface GeneratedType {
+  name: string;
+  content: string;
+  dependencies: string[];
+}
+
+// Text Diff Checker types
+export interface DiffCheckerState {
+  originalText: string;
+  modifiedText: string;
+  diffResult: DiffResult[];
+  showLineNumbers: boolean;
+}
+
+export interface DiffResult {
+  type: 'added' | 'removed' | 'unchanged';
+  value: string;
+  lineNumber?: number;
+}

@@ -34,13 +34,15 @@ describe('ToolRegistry', () => {
   test('should return all registered tools', () => {
     const tools = toolRegistry.getAllTools();
     
-    // Should have at least the default tools (JSON Converter, JSON Visualizer, CSV Viewer)
-    expect(tools.length).toBeGreaterThanOrEqual(3);
+    // Should have at least the default tools plus new developer tools
+    expect(tools.length).toBeGreaterThanOrEqual(5);
     
     const toolIds = tools.map(tool => tool.id);
     expect(toolIds).toContain('json-converter');
     expect(toolIds).toContain('json-visualizer');
     expect(toolIds).toContain('csv-viewer');
+    expect(toolIds).toContain('json-type-generator');
+    expect(toolIds).toContain('diff-checker');
   });
 
   test('should group tools by category', () => {
@@ -48,6 +50,17 @@ describe('ToolRegistry', () => {
     
     expect(toolsByCategory).toHaveProperty('Data Processing');
     expect(toolsByCategory['Data Processing'].length).toBeGreaterThanOrEqual(3);
+    
+    // Check new categories
+    expect(toolsByCategory).toHaveProperty('Code Generation');
+    expect(toolsByCategory['Code Generation']).toContainEqual(
+      expect.objectContaining({ id: 'json-type-generator' })
+    );
+    
+    expect(toolsByCategory).toHaveProperty('Text Processing');
+    expect(toolsByCategory['Text Processing']).toContainEqual(
+      expect.objectContaining({ id: 'diff-checker' })
+    );
   });
 
   test('should update existing tool when registering with same id', () => {
