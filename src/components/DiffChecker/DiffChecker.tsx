@@ -53,63 +53,65 @@ const DiffCheckerCore: React.FC = () => {
   const { originalText, modifiedText, showLineNumbers } = persistentState;
   const { diffResult, isProcessing, error, copySuccess } = localState;
 
-  // Debounced diff processing function - memoized to prevent recreation
-  const debouncedProcessDiff = useMemo(() => {
-    return debounce((originalText: string, modifiedText: string) => {
-      // Set processing state
-      setLocalState(prev => ({ ...prev, isProcessing: true, error: null }));
+// Debounced diff processing function - defined outside the component to prevent recreation
+const debouncedProcessDiff = debounce((
+  originalText: string,
+  modifiedText: string,
+  setLocalState: React.Dispatch<React.SetStateAction<DiffCheckerLocalState>>
+) => {
+  // Set processing state
+  setLocalState(prev => ({ ...prev, isProcessing: true, error: null }));
 
-      try {
-        // Validate input sizes
-        const originalValidation = validateTextInput(originalText);
-        const modifiedValidation = validateTextInput(modifiedText);
+  try {
+    // Validate input sizes
+    const originalValidation = validateTextInput(originalText);
+    const modifiedValidation = validateTextInput(modifiedText);
 
-        if (!originalValidation.isValid) {
-          setLocalState(prev => ({
-            ...prev,
-            isProcessing: false,
-            error: `Original text: ${originalValidation.error}`,
-            diffResult: []
-          }));
-          return;
-        }
+    if (!originalValidation.isValid) {
+      setLocalState(prev => ({
+        ...prev,
+        isProcessing: false,
+        error: `Original text: ${originalValidation.error}`,
+        diffResult: []
+      }));
+      return;
+    }
 
-        if (!modifiedValidation.isValid) {
-          setLocalState(prev => ({
-            ...prev,
-            isProcessing: false,
-            error: `Modified text: ${modifiedValidation.error}`,
-            diffResult: []
-          }));
-          return;
-        }
+    if (!modifiedValidation.isValid) {
+      setLocalState(prev => ({
+        ...prev,
+        isProcessing: false,
+        error: `Modified text: ${modifiedValidation.error}`,
+        diffResult: []
+      }));
+      return;
+    }
 
-        // Optimize large texts for performance
-        const optimizedOriginal = optimizeTextForDiff(originalText);
-        const optimizedModified = optimizeTextForDiff(modifiedText);
+    // Optimize large texts for performance
+    const optimizedOriginal = optimizeTextForDiff(originalText);
+    const optimizedModified = optimizeTextForDiff(modifiedText);
 
-        // Process the diff
-        const diffResult = processTextDiff(optimizedOriginal.text, optimizedModified.text);
+    // Process the diff
+    const diffResult = processTextDiff(optimizedOriginal.text, optimizedModified.text);
 
-        // Update state with results
-        setLocalState(prev => ({
-          ...prev,
-          diffResult,
-          isProcessing: false,
-          error: optimizedOriginal.truncated || optimizedModified.truncated 
-            ? 'Large text was truncated for performance. Consider processing smaller chunks.'
-            : null
-        }));
-      } catch (error) {
-        setLocalState(prev => ({
-          ...prev,
-          isProcessing: false,
-          error: `Error processing diff: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          diffResult: []
-        }));
-      }
-    }, 300); // 300ms debounce delay
-  }, []); // Empty dependency array to prevent recreation
+    // Update state with results
+    setLocalState(prev => ({
+      ...prev,
+      diffResult,
+      isProcessing: false,
+      error: optimizedOriginal.truncated || optimizedModified.truncated 
+        ? 'Large text was truncated for performance. Consider processing smaller chunks.'
+        : null
+    }));
+  } catch (error) {
+    setLocalState(prev => ({
+      ...prev,
+      isProcessing: false,
+      error: `Error processing diff: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      diffResult: []
+    }));
+  }
+}, 300); // 300ms debounce delay
 
   // Effect to trigger diff processing when text changes
   useEffect(() => {
