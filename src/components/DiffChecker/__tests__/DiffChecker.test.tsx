@@ -228,7 +228,7 @@ describe('DiffChecker', () => {
 
   test('share button works when inputs have content', async () => {
     const { copyToClipboard } = await import('@/utils/clipboardHelper');
-    vi.mocked(copyToClipboard).mockResolvedValue(undefined);
+    vi.mocked(copyToClipboard).mockResolvedValue(true);
 
     renderWithRouter(<DiffChecker />);
     
