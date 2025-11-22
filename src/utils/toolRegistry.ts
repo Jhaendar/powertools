@@ -10,6 +10,7 @@ const CSVViewer = React.lazy(() => import('../components/CSVViewer/CSVViewer'));
 const JSONTypeGenerator = React.lazy(() => import('../components/JSONTypeGenerator/JSONTypeGenerator'));
 const DiffChecker = React.lazy(() => import('../components/DiffChecker/DiffChecker'));
 const RegexTester = React.lazy(() => import('../components/RegexTester/RegexTester'));
+const JWTDecoder = React.lazy(() => import('../components/JWTDecoder/JWTDecoder'));
 
 class ToolRegistryImpl implements ToolRegistry {
   private _tools: Tool[] = [];
@@ -72,6 +73,16 @@ class ToolRegistryImpl implements ToolRegistry {
       description: 'Test regular expressions with live pattern matching and capture groups',
       icon: 'Regex',
       category: 'Text Processing'
+    });
+
+    this.registerTool({
+      id: 'jwt-decoder',
+      name: 'JWT Decoder',
+      path: '/jwt-decoder',
+      component: JWTDecoder,
+      description: 'Decode and inspect JSON Web Tokens with validation',
+      icon: 'KeyRound',
+      category: 'Security Tools'
     });
 
     // Future tools - placeholder for demonstration

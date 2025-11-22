@@ -1,0 +1,33 @@
+.jwt-decoder-container {
+  max-width: 1200px;
+}
+
+/* Ensure proper spacing for mobile */
+@media (max-width: 640px) {
+  .jwt-decoder-container {
+    padding: 1rem;
+  }
+}
+
+/* Improve readability of JSON output */
+.jwt-decoder-container pre {
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* Ensure buttons are touch-friendly on mobile */
+.jwt-decoder-container .touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Add smooth transitions for copy success state */
+.jwt-decoder-container button {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Style for claim descriptions */
+.jwt-decoder-container .claim-description {
+  font-style: italic;
+  opacity: 0.7;
+}

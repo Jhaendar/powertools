@@ -5,6 +5,7 @@ export { default as JSONConverter } from './JSONConverter/JSONConverter';
 export { default as JSONVisualizer } from './JSONVisualizer/JSONVisualizer';
 export { default as CSVViewer } from './CSVViewer/CSVViewer';
 export { default as JSONTypeGenerator } from './JSONTypeGenerator/JSONTypeGenerator';
+export { default as JWTDecoder } from './JWTDecoder/JWTDecoder';
 
 // Layout components
 export { default as Layout } from './Layout/Layout';
