@@ -9,6 +9,7 @@ const CSVViewer = React.lazy(() => import('../components/CSVViewer/CSVViewer'));
 // New developer tools
 const JSONTypeGenerator = React.lazy(() => import('../components/JSONTypeGenerator/JSONTypeGenerator'));
 const DiffChecker = React.lazy(() => import('../components/DiffChecker/DiffChecker'));
+const RegexTester = React.lazy(() => import('../components/RegexTester/RegexTester'));
 
 class ToolRegistryImpl implements ToolRegistry {
   private _tools: Tool[] = [];
@@ -60,6 +61,16 @@ class ToolRegistryImpl implements ToolRegistry {
       component: DiffChecker,
       description: 'Compare text differences with GitHub-style output',
       icon: 'GitCompare',
+      category: 'Text Processing'
+    });
+
+    this.registerTool({
+      id: 'regex-tester',
+      name: 'Regex Tester',
+      path: '/regex-tester',
+      component: RegexTester,
+      description: 'Test regular expressions with live pattern matching and capture groups',
+      icon: 'Regex',
       category: 'Text Processing'
     });
 
