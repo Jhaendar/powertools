@@ -10,6 +10,7 @@ const CSVViewer = React.lazy(() => import('../components/CSVViewer/CSVViewer'));
 const JSONTypeGenerator = React.lazy(() => import('../components/JSONTypeGenerator/JSONTypeGenerator'));
 const DiffChecker = React.lazy(() => import('../components/DiffChecker/DiffChecker'));
 const RegexTester = React.lazy(() => import('../components/RegexTester/RegexTester'));
+const HashGenerator = React.lazy(() => import('../components/HashGenerator/HashGenerator'));
 
 class ToolRegistryImpl implements ToolRegistry {
   private _tools: Tool[] = [];
@@ -72,6 +73,16 @@ class ToolRegistryImpl implements ToolRegistry {
       description: 'Test regular expressions with live pattern matching and capture groups',
       icon: 'Regex',
       category: 'Text Processing'
+    });
+
+    this.registerTool({
+      id: 'hash-generator',
+      name: 'Hash Generator',
+      path: '/hash-generator',
+      component: HashGenerator,
+      description: 'Generate cryptographic hashes (MD5, SHA-1, SHA-256, SHA-512, etc.) from text or files',
+      icon: 'Lock',
+      category: 'Security Tools'
     });
 
     // Future tools - placeholder for demonstration

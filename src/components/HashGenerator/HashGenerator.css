@@ -1,0 +1,23 @@
+.hash-generator-container {
+  max-width: 1200px;
+}
+
+.hash-generator-container kbd {
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+/* Ensure hash text is selectable and easy to copy */
+.hash-generator-container .select-all {
+  user-select: all;
+  -webkit-user-select: all;
+  -moz-user-select: all;
+  -ms-user-select: all;
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 768px) {
+  .hash-generator-container .touch-manipulation {
+    touch-action: manipulation;
+  }
+}
