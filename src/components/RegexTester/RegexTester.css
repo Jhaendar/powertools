@@ -1,0 +1,59 @@
+.regex-tester-container {
+  max-width: 1200px;
+}
+
+.regex-tester-container mark {
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.regex-tester-container mark:hover {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+/* Smooth transitions for collapsible sections */
+.regex-tester-container [data-state="open"] {
+  animation: slideDown 200ms ease-out;
+}
+
+.regex-tester-container [data-state="closed"] {
+  animation: slideUp 200ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    max-height: 500px;
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+  }
+}
+
+/* Code styling */
+.regex-tester-container code {
+  background-color: hsl(var(--muted));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+/* Keyboard shortcut styling */
+.regex-tester-container kbd {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border: 1px solid hsl(var(--border));
+}
